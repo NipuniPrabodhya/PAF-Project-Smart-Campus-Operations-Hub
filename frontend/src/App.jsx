@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Home from './pages/Home';
 import AssetCatalogue from './pages/AssetCatalogue';
+import ResourceManager from './pages/ResourceManager';
 import './styles/global.css';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
             <Link to="/" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Home</Link>
             <Link to="/catalogue" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Assets</Link>
+            <Link to="/manage" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Manage</Link>
             <button className="btn-primary" style={{ padding: '8px 20px' }}>Login</button>
           </div>
         </nav>
@@ -32,6 +34,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/catalogue" element={<AssetCatalogue />} />
+            <Route path="/manage" element={<ResourceManager />} />
           </Routes>
         </main>
       </div>

@@ -3,6 +3,9 @@ package com.smartcampus.service;
 import com.smartcampus.model.Resource;
 import com.smartcampus.repository.ResourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +16,9 @@ public class ResourceService {
 
     @Autowired
     private ResourceRepository resourceRepository;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     public List<Resource> getAllResources() {
         return resourceRepository.findAll();
@@ -26,16 +32,17 @@ public class ResourceService {
         return resourceRepository.save(resource);
     }
 
-    public Resource updateResource(String id, Resource resourceDetails) {
+    public Resource updateResource(String id, Resource details) {
         Resource resource = resourceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Resource not found"));
         
-        resource.setName(resourceDetails.getName());
-        resource.setType(resourceDetails.getType());
-        resource.setCapacity(resourceDetails.getCapacity());
-        resource.setLocation(resourceDetails.getLocation());
-        resource.setStatus(resourceDetails.getStatus());
-        resource.setAvailabilityWindows(resourceDetails.getAvailabilityWindows());
+        resource.setName(details.getName());
+        resource.setType(details.getType());
+        resource.setCapacity(details.getCapacity());
+        resource.setLocation(details.getLocation());
+        resource.setStatus(details.getStatus());
+        resource.setAvailableFrom(details.getAvailableFrom());
+        resource.setAvailableTo(details.getAvailableTo());
         
         return resourceRepository.save(resource);
     }
@@ -44,10 +51,17 @@ public class ResourceService {
         resourceRepository.deleteById(id);
     }
 
-    public List<Resource> filterResources(String type, String location, Integer minCapacity) {
-        if (type != null) return resourceRepository.findByType(type);
-        if (location != null) return resourceRepository.findByLocation(location);
-        if (minCapacity != null) return resourceRepository.findByMinCapacity(minCapacity);
-        return resourceRepository.findAll();
+    public List<Resource> filterResources(String type, String location, Integer capacity) {
+        Query query = new Query();
+        if (type != null && !type.isEmpty()) {
+            query.addCriteria(Criteria.where("type").is(type));
+        }
+        if (location != null && !location.isEmpty()) {
+            query.addCriteria(Criteria.where("location").regex(location, "i"));
+        }
+        if (capacity != null) {
+            query.addCriteria(Criteria.where("capacity").gte(capacity));
+        }
+        return mongoTemplate.find(query, Resource.class);
     }
 }
